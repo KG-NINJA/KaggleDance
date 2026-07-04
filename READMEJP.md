@@ -1,7 +1,7 @@
-# Autokaggler  
+# KaggleDance  
 ### Kaggle チュートリアル自動クリアシステム
 
-Autokaggler は、Kaggle の入門チュートリアル（代表例：Titanic）を  
+KaggleDance は、Kaggle の入門チュートリアル（代表例：Titanic）を  
 **人が操作せずに最後まで自動でクリアするための実験的システム**です。
 
 単なるスクリプト集ではなく、  
