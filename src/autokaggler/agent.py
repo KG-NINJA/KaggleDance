@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import sys
+import time
 import traceback
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -13,12 +14,15 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .data_manager import DataManager
+from .kaggle_submit import SUBMIT_CONFIRMATION, submit_to_kaggle_if_requested
 from .nvidia_adapter import NvidiaKaggleAdapter, NvidiaKaggleContext
 from .pipeline import TitanicPipeline, TitanicPipelineResult
+from .reporting import write_titanic_mastery_report
 
 RUNTIME_DIRS = [Path(".agent_tmp"), Path(".agent_logs")]
+REPORT_DIR = RUNTIME_DIRS[0] / "reports"
 DEFAULT_PROFILE = "fast"
-VALID_PROFILES = {"fast", "tree", "boosting", "ensemble", "power", "linear"}
+VALID_PROFILES = {"fast", "tree", "boosting", "ensemble", "power", "linear", "auto"}
 PROFILE_ALIASES = {"linear": "fast", "power": "tree"}
 TAG = "#KGNINJA"
 
@@ -34,6 +38,10 @@ class TaskInput:
     random_seed: int = 42
     submission_name: Optional[str] = None
     notes: Optional[str] = None
+    report: bool = True
+    submit: bool = False
+    confirm_submit: Optional[str] = None
+    submit_message: str = "KaggleDance autonomous Titanic submission"
     nvidia_mode: str = "off"
     nvidia_dry_run: bool = True
 
@@ -87,6 +95,7 @@ def configure_logging(run_id: str) -> Path:
             logging.FileHandler(log_path, mode="w", encoding="utf-8"),
             logging.StreamHandler(sys.stderr),
         ],
+        force=True,
     )
     logging.info("Logging initialised for run %s", run_id)
     return log_path
@@ -127,6 +136,10 @@ def run_agent(
 ) -> tuple[TitanicPipelineResult, NvidiaKaggleContext]:
     """Execute the Titanic pipeline."""
 
+    started = time.perf_counter()
+    if task_input.competition != "titanic":
+        raise ValueError("Only competition='titanic' is implemented in this release")
+
     data_manager = DataManager(cache_dir=RUNTIME_DIRS[0])
     train_df, test_df, data_meta = data_manager.prepare_datasets(
         prefer_source=task_input.data_source,
@@ -145,6 +158,28 @@ def run_agent(
         notes=task_input.notes,
         data_meta=data_meta,
     )
+
+    submit_result = submit_to_kaggle_if_requested(
+        submit=task_input.submit,
+        confirm_submit=task_input.confirm_submit,
+        competition=task_input.competition,
+        submission_path=Path(result.submission_path),
+        expected_rows=len(test_df),
+        message=task_input.submit_message,
+        log_dir=RUNTIME_DIRS[1],
+    )
+    result.submit_result = submit_result
+
+    if task_input.report:
+        report_path = write_titanic_mastery_report(
+            result=result,
+            run_id=run_id,
+            report_dir=REPORT_DIR,
+            elapsed_seconds=time.perf_counter() - started,
+            competition=task_input.competition,
+            submit_status=submit_result,
+        )
+        result.report_path = str(report_path)
     return result, nvidia_context
 
 
@@ -168,9 +203,18 @@ def build_success_result(
         "cv_mean_accuracy": result.cv_mean,
         "cv_std": result.cv_std,
         "model_name": result.model_name,
+        "requested_profile": result.requested_profile,
+        "selected_profile": result.selected_profile,
+        "cv_results": result.cv_results,
+        "feature_columns": result.feature_columns,
+        "feature_importance": result.feature_importance,
         "submission_path": result.submission_path,
+        "report_path": result.report_path,
+        "submit_result": result.submit_result,
         "data_source": result.data_source,
         "notes": result.notes,
+        "achievement": "Titanic Mastery Achieved",
+        "submit_confirmation_required": SUBMIT_CONFIRMATION,
     }
     if nvidia_context is not None:
         payload["nvidia_kaggle"] = {
@@ -234,4 +278,3 @@ def main() -> None:
 
 if __name__ == "__main__":  # pragma: no cover
     main()
-
