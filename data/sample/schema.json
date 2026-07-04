@@ -1,0 +1,17 @@
+{
+  "description": "Synthetic Titanic-shaped sample data for offline development and tests. It is not Kaggle competition data and does not contain real passenger records.",
+  "features": {
+    "PassengerId": "Synthetic unique identifier for each passenger row",
+    "Survived": "Synthetic target label indicating survival (1) or not (0)",
+    "Pclass": "Ticket class-like category (1st, 2nd, 3rd)",
+    "Name": "Synthetic passenger name with Titanic-like title format",
+    "Sex": "Passenger gender category",
+    "Age": "Passenger age in years",
+    "SibSp": "Number of sibling/spouse-like relations aboard",
+    "Parch": "Number of parent/child-like relations aboard",
+    "Ticket": "Synthetic ticket identifier",
+    "Fare": "Synthetic fare value",
+    "Cabin": "Synthetic cabin identifier or blank",
+    "Embarked": "Embarkation-like category"
+  }
+}

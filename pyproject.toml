@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autokaggler"
+version = "0.1.0"
+description = "Automated pipeline for Kaggle Titanic tutorial"
+authors = [{name = "AutoKaggler"}]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=1.5",
+    "numpy>=1.23",
+    "scikit-learn>=1.1",
+]
+
+[project.optional-dependencies]
+kaggle = [
+    "kaggle>=1.5.13",
+]
+test = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://www.kaggle.com/competitions/titanic"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+norecursedirs = ["github_shareable", ".venv", ".agent_tmp", ".agent_logs"]

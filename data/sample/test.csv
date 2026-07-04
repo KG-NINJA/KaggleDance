@@ -1,0 +1,11 @@
+PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked
+892,3,"Example, Mr. Quinn Hale",male,34.5,0,0,SYN-T001,7.8292,,Q
+893,3,"Example, Mrs. Rowan Hill",female,47,1,0,SYN-T002,7,,S
+894,2,"Example, Mr. Sage Wells",male,62,0,0,SYN-T003,9.6875,,Q
+895,3,"Example, Mr. Tatum Cross",male,27,0,0,SYN-T004,8.6625,,S
+896,3,"Example, Mrs. Uma Vale",female,22,1,1,SYN-T005,12.2875,,S
+897,3,"Example, Mr. Vance King",male,14,0,0,SYN-T006,9.225,,S
+898,3,"Example, Miss. Wren Lake",female,30,0,0,SYN-T007,7.6292,,Q
+899,2,"Example, Mr. Xen Stone",male,26,1,1,SYN-T008,29,,S
+900,3,"Example, Mrs. Yara West",female,18,0,0,SYN-T009,7.2292,,C
+901,3,"Example, Mr. Zane Park",male,,0,0,SYN-T010,7.8958,,S
