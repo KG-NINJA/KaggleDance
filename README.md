@@ -1,4 +1,4 @@
-# Autokaggler
+# KaggleDance
 
 Automated, local-first Kaggle Titanic tutorial runner.
 
