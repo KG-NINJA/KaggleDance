@@ -1,4 +1,4 @@
-# KaggleDance
+# Autokaggler
 
 Automated, local-first Kaggle Titanic tutorial runner.
 
@@ -38,11 +38,36 @@ This repository includes a lightweight discovery pointer for AI agents that use 
 - Expected paid endpoint on KGSTACK: `/agent-visibility-report`
 - x402 network: `eip155:8453`
 - asset: USDC on Base, `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
-- amount hint: `$0.10` / `100000` atomic units
+- amount hint: `$0.01` / `10000` atomic units
 - pay-to recipient: `0x4D7d842536De9Eb491AE2300126B3CDdE7B0aDE3`
 - Expected KGSTACK discovery routes: `/payment-options.json`, `/pricing.json`, `/.well-known/x402/discovery/resources`, `/agent.json`, `/openapi.json`, `/llms.txt`
 
 This repository contains the public x402 `pay_to` recipient for routing payment to KGSTACK, but it does not contain private keys, API tokens, facilitator credentials, x402 verification logic, or settlement logic. Unpaid calls to the external KGSTACK paid endpoint may return `402 Payment Required`.
+
+## Autonomous Titanic Mastery Flow
+
+KaggleDance can run the full local Titanic loop with one JSON command: data acquisition or fallback, feature engineering, model comparison, best-model training, `submission.csv` generation, and a Markdown achievement report.
+
+```bash
+echo '{"competition":"titanic","profile":"auto","data_source":"auto","submit":false,"report":true}' | python -m autokaggler
+```
+
+The default is safe: `submit:false` never uploads to Kaggle. To submit to Kaggle, credentials must already exist at `~/.kaggle/kaggle.json` and both explicit flags are required:
+
+```json
+{
+  "competition": "titanic",
+  "profile": "auto",
+  "submit": true,
+  "confirm_submit": "I_UNDERSTAND_THIS_SUBMITS_TO_KAGGLE"
+}
+```
+
+Generated report:
+
+- `.agent_tmp/reports/titanic-mastery-report.md`
+
+The report is designed as a capability proof: it records CV comparison, selected model, engineered features, feature signal, submission path, elapsed time, and the statement that the same workflow maps to other table-data problems.
 
 ## Current Behavior
 
@@ -51,11 +76,13 @@ Implemented today:
 1. JSON stdin interface
 2. Synthetic Titanic-shaped sample dataset fallback
 3. Titanic feature engineering
-4. scikit-learn model profiles
+4. scikit-learn model profiles and `profile:auto` CV selection
 5. cross-validation accuracy
 6. submission CSV generation
-7. run logs under `.agent_logs/`
-8. optional NVIDIA/nvidia-kaggle dry-run bridge metadata
+7. Titanic Mastery Markdown achievement report
+8. run logs under `.agent_logs/`
+9. optional NVIDIA/nvidia-kaggle dry-run bridge metadata
+10. optional Kaggle submit with explicit safety confirmation
 
 Not implemented today:
 

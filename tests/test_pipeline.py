@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 from autokaggler.agent import build_success_result, load_task_input, main
+from autokaggler.kaggle_submit import SUBMIT_CONFIRMATION, submit_to_kaggle_if_requested
 from autokaggler.data_manager import DataManager
 from autokaggler.nvidia_adapter import NvidiaKaggleAdapter
 from autokaggler.pipeline import TitanicPipeline, TitanicPipelineResult
@@ -35,7 +36,7 @@ def test_agent_payment_metadata_is_safe_discovery_only():
     assert payload["payment"]["pay_to"] == "0x4D7d842536De9Eb491AE2300126B3CDdE7B0aDE3"
     assert payload["payment"]["network"] == "eip155:8453"
     assert payload["payment"]["asset"]["contract"] == "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-    assert payload["payment"]["amount"]["atomic_units"] == "100000"
+    assert payload["payment"]["amount"]["atomic_units"] == "10000"
     assert payload["payment"]["safety"]["repository_contains_public_pay_to_address"] is True
     assert payload["payment"]["safety"]["repository_contains_tokens"] is False
     assert payload["payment"]["safety"]["repository_contains_settlement_logic"] is False
@@ -62,6 +63,8 @@ def test_json_input_uses_task_defaults_for_missing_fields():
     assert task_input.data_source == "auto"
     assert task_input.nvidia_mode == "off"
     assert task_input.nvidia_dry_run is True
+    assert task_input.report is True
+    assert task_input.submit is False
 
 
 def test_nvidia_adapter_reports_dry_run_without_external_command():
@@ -120,6 +123,44 @@ def test_each_model_profile_runs_on_sample_data(tmp_path):
         assert Path(result.submission_path).exists()
 
 
+def test_auto_profile_selects_model_and_records_cv_results(tmp_path):
+    manager = DataManager(cache_dir=tmp_path)
+    train_df, test_df, meta = manager.prepare_datasets(prefer_source="sample")
+    pipeline = TitanicPipeline(profile="auto", random_seed=7)
+    result = pipeline.run(
+        train_df=train_df,
+        test_df=test_df,
+        submission_name="auto.csv",
+        output_dir=manager.submission_dir,
+        notes="pytest",
+        data_meta=meta,
+    )
+
+    assert result.requested_profile == "auto"
+    assert result.selected_profile in EXPECTED_MODELS
+    assert set(result.cv_results) == set(EXPECTED_MODELS)
+    assert Path(result.submission_path).exists()
+
+
+def test_submit_gate_blocks_without_explicit_confirmation(tmp_path):
+    path = tmp_path / "submission.csv"
+    pd.DataFrame({"PassengerId": [1, 2], "Survived": [0, 1]}).to_csv(path, index=False)
+
+    result = submit_to_kaggle_if_requested(
+        submit=True,
+        confirm_submit=None,
+        competition="titanic",
+        submission_path=path,
+        expected_rows=2,
+        message="pytest",
+        log_dir=tmp_path,
+    )
+
+    assert result["submitted"] is False
+    assert result["status"] == "blocked"
+    assert result["safety_gate"] == SUBMIT_CONFIRMATION
+
+
 def test_submission_csv_generation(tmp_path):
     manager = DataManager(cache_dir=tmp_path)
     train_df, test_df, meta = manager.prepare_datasets(prefer_source="sample")
@@ -148,8 +189,9 @@ def test_module_main_accepts_stdin_json_and_writes_submission(tmp_path, monkeypa
             (),
             {
                 "read": lambda self: (
-                    '{"profile":"fast","nvidia_mode":"research",'
-                    '"nvidia_dry_run":true}'
+                    '{"profile":"auto","data_source":"sample",'
+                    '"nvidia_mode":"research","nvidia_dry_run":true,'
+                    '"submit":false,"report":true}'
                 )
             },
         )(),
@@ -159,11 +201,15 @@ def test_module_main_accepts_stdin_json_and_writes_submission(tmp_path, monkeypa
 
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is True
-    assert payload["meta"]["profile"] == "fast"
+    assert payload["meta"]["profile"] == "auto"
     assert payload["result"]["nvidia_kaggle"]["status"] == "dry_run"
     assert payload["result"]["nvidia_kaggle"]["competition"] == "titanic"
     assert payload["result"]["nvidia_kaggle"]["details"]["dry_run"] is True
+    assert payload["result"]["achievement"] == "Titanic Mastery Achieved"
+    assert payload["result"]["selected_profile"] in EXPECTED_MODELS
     assert Path(payload["result"]["submission_path"]).exists()
+    assert Path(payload["result"]["report_path"]).exists()
+    assert payload["result"]["submit_result"]["status"] == "dry_run"
 
 
 def test_success_result_contains_required_metadata(tmp_path):
@@ -171,6 +217,8 @@ def test_success_result_contains_required_metadata(tmp_path):
         cv_mean=0.5,
         cv_std=0.1,
         model_name="LogisticRegression",
+        selected_profile="fast",
+        requested_profile="fast",
         submission_path=str(tmp_path / "submission.csv"),
         data_source="sample",
         notes=None,
