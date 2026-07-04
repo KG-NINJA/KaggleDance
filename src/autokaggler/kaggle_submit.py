@@ -62,9 +62,14 @@ def submit_to_kaggle_if_requested(
         payload.update({"status": "blocked", "reason": "kaggle package is not installed"})
         return payload
 
-    api = KaggleApi()
-    api.authenticate()
-    api.competition_submit(str(submission_path), message, competition)
+    try:
+        api = KaggleApi()
+        api.authenticate()
+        api.competition_submit(str(submission_path), message, competition)
+    except Exception as exc:  # Kaggle API can fail on auth, network, or submission.
+        payload.update({"status": "failed", "reason": f"{type(exc).__name__}: {exc}"})
+        return payload
+
     payload.update({"submitted": True, "status": "submitted", "message": message})
     log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_dir / f"submit-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}.json"
@@ -74,3 +79,5 @@ def submit_to_kaggle_if_requested(
 
 
 __all__ = ["SUBMIT_CONFIRMATION", "submit_to_kaggle_if_requested", "validate_submission_csv"]
+
+

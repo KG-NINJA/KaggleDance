@@ -30,7 +30,7 @@
     "data_sources": ["kaggle_optional", "synthetic_sample_fallback"],
     "features": ["Title", "FamilySize", "HasCabin", "AgePclass", "FarePerPerson"],
     "profiles": ["fast", "tree", "boosting", "ensemble", "auto"],
-    "outputs": ["submission.csv", "titanic-mastery-report.md", "run log JSON"]
+    "outputs": ["submission.csv", "titanic-mastery-report.md", "run logs"]
   },
   "not_implemented_today": [
     "default_or_automatic_kaggle_submission",
@@ -76,3 +76,4 @@
     "report": true
   }
 }
+

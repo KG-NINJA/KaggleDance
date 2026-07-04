@@ -70,7 +70,7 @@ Implemented today:
 3. Kaggle data download when optional Kaggle package and local `~/.kaggle/kaggle.json` credentials are available.
 4. Synthetic Titanic-shaped sample dataset fallback.
 5. Titanic feature engineering: `Title`, `FamilySize`, `HasCabin`, `AgePclass`, `FarePerPerson`.
-6. scikit-learn model profiles: `fast`, `tree`, `boosting`, `ensemble`, and `auto` CV selection.
+6. scikit-lean model profiles: `fast`, `tree`, `boosting`, `ensemble`, and `auto` CV selection.
 7. cross-validation accuracy and feature signal output.
 8. Kaggle-shaped `submission.csv` generation.
 9. Titanic Mastery Markdown achievement report.
@@ -104,7 +104,7 @@ The pipeline creates these Titanic-specific features before preprocessing:
 | --- | --- |
 | `fast` | `LogisticRegression` |
 | `tree` | `RandomForestClassifier` |
-| `boosting` | `HistGradientBoostingClassifier` with sklean-only fallback path |
+| `boosting` | `HistGradientBoostingClassifier` with sklearn-only fallback path |
 | `ensemble` | soft-voting `VotingClassifier` over fast/tree/boosting |
 
 Compatibility aliases:
@@ -130,7 +130,7 @@ Place Kaggle credentials at `~/.kaggle/kaggle.json` if using `data_source: "kagg
 
 ## Optional NVIDIA Bridge
 
-KaggleDance can expose NVIDIA/nvidia-kaggle as a lower-level research/plugin capability while keeping the local Titanic execution path unchanged. This is opt-in and dry-run by default. It never submits to Kaggle or uploads datasets.
+KaggleDance can expose NVIDIA/nvidia-kaggle as a lower-level research/plugin capability while keeping the local Titanic execution path unchanged. This bridge is opt-in and dry-run by default. When a local command is configured, KaggleDance invokes it with `--no-submit` and `--no-upload`; external tooling must still honor those flags.
 
 ```bash
 echo '{"profile":"fast","nvidia_mode":"research"}' | python -m autokaggler
@@ -195,3 +195,5 @@ PYTHONPATH=src python -m pytest -q
 ## Safety
 
 Default KaggleDance runs do not submit to Kaggle and do not upload datasets. This repository does not include Kaggle credentials, private keys, wallet secrets, x402 facilitator credentials, x402 verification code, or settlement logic.
+
+

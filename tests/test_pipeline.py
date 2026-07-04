@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import sys
+import types
 from pathlib import Path
 
 import pandas as pd
@@ -191,6 +193,39 @@ def test_submit_gate_blocks_without_explicit_confirmation(tmp_path):
     assert result["safety_gate"] == SUBMIT_CONFIRMATION
 
 
+
+def test_submit_returns_failed_when_kaggle_api_raises(tmp_path, monkeypatch):
+    path = tmp_path / "submission.csv"
+    pd.DataFrame({"PassengerId": [1, 2], "Survived": [0, 1]}).to_csv(path, index=False)
+
+    class FakeKaggleApi:
+        def authenticate(self):
+            raise RuntimeError("auth boom")
+
+        def competition_submit(self, *_args, **_kwargs):
+            raise AssertionError("should not submit after auth failure")
+
+    fake_module = types.ModuleType("kaggle.api.kaggle_api_extended")
+    fake_module.KaggleApi = FakeKaggleApi
+    monkeypatch.setitem(sys.modules, "kaggle", types.ModuleType("kaggle"))
+    monkeypatch.setitem(sys.modules, "kaggle.api", types.ModuleType("kaggle.api"))
+    monkeypatch.setitem(sys.modules, "kaggle.api.kaggle_api_extended", fake_module)
+
+    result = submit_to_kaggle_if_requested(
+        submit=True,
+        confirm_submit=SUBMIT_CONFIRMATION,
+        competition="titanic",
+        submission_path=path,
+        expected_rows=2,
+        message="pytest",
+        log_dir=tmp_path,
+    )
+
+    assert result["submitted"] is False
+    assert result["status"] == "failed"
+    assert result["reason"] == "RuntimeError: auth boom"
+
+
 def test_submission_csv_generation(tmp_path):
     manager = DataManager(cache_dir=tmp_path)
     train_df, test_df, meta = manager.prepare_datasets(prefer_source="sample")
@@ -261,5 +296,7 @@ def test_success_result_contains_required_metadata(tmp_path):
     )
     assert agent_result.ok is True
     assert "#KGNINJA" in agent_result.meta["tags"]
+
+
 
 
