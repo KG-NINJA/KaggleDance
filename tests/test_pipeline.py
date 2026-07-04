@@ -41,7 +41,37 @@ def test_agent_payment_metadata_is_safe_discovery_only():
     assert payload["payment"]["safety"]["repository_contains_tokens"] is False
     assert payload["payment"]["safety"]["repository_contains_settlement_logic"] is False
     assert payload["payment"]["safety"]["human_manual_use_payment_required"] is False
+    assert payload["payment"]["safety"]["default_submit_to_kaggle"] is False
+    assert payload["payment"]["safety"]["payment_enforcement_code"] is False
+    assert payload["name"] == "KaggleDance AI Agent Payment Discovery"
+    assert payload["architecture"]["kaggledance"].startswith("Higher-level agent-facing")
+    notification = payload["payment"]["notification"]["telegram"]
+    assert notification["enabled"] is True
+    assert notification["handled_by"] == "KGSTACK payment Worker and Telegram revenue monitor"
+    assert notification["request_project_hint"] == "KaggleDance / Autokaggler"
+    assert notification["secrets_in_repository"] is False
+    assert "project=\"KaggleDance / Autokaggler\"" in " ".join(payload["agent_instructions"])
 
+
+
+
+def test_agent_json_positions_kaggledance_above_autokaggler():
+    agent_path = Path(__file__).resolve().parents[1] / "agent.json"
+    payload = json.loads(agent_path.read_text(encoding="utf-8"))
+
+    assert payload["name"] == "KaggleDance"
+    assert payload["runtime"]["python_package"] == "autokaggler"
+    assert payload["runtime"]["module_command"] == "python -m autokaggler"
+    assert payload["safe_defaults"]["default_submit_to_kaggle"] is False
+    assert payload["safe_defaults"]["default_dataset_upload"] is False
+    assert payload["safe_defaults"]["contains_private_keys"] is False
+    assert payload["safe_defaults"]["contains_settlement_logic"] is False
+    assert payload["architecture"]["kaggledance"].startswith("Higher-level agent-facing")
+    assert "autokaggler" in payload["architecture"]["autokaggler_runtime"]
+    assert payload["use_terms"]["human_manual_use"]["price"] == "free"
+    assert payload["use_terms"]["ai_agent_autonomous_reuse_or_adaptation"]["payment_via"] == "KGSTACK x402 discovery"
+    assert payload["payment_discovery"]["paid_endpoint"] == "/agent-visibility-report"
+    assert payload["payment_discovery"]["unpaid_status"] == 402
 
 def test_json_input_parsing_preserves_known_and_extra_fields():
     task_input = load_task_input(
@@ -231,3 +261,5 @@ def test_success_result_contains_required_metadata(tmp_path):
     )
     assert agent_result.ok is True
     assert "#KGNINJA" in agent_result.meta["tags"]
+
+

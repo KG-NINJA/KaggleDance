@@ -1,7 +1,7 @@
 {
-  "name": "Autokaggler AI Agent Payment",
+  "name": "KaggleDance AI Agent Payment Discovery",
   "version": "0.1.0",
-  "purpose": "Discovery metadata for AI agents that use Autokaggler and need to access KGSTACK x402-paid agent visibility reporting.",
+  "purpose": "Discovery metadata for AI agents that use KaggleDance, the higher-level agent-facing distribution over the autokaggler runtime and optional NVIDIA/nvidia-kaggle bridge.",
   "usage_policy": {
     "human_manual_use": {
       "price": "free",
@@ -61,7 +61,18 @@
       "repository_contains_settlement_logic": false,
       "kaggle_submission_upload": false,
       "dataset_upload": false,
-      "human_manual_use_payment_required": false
+      "human_manual_use_payment_required": false,
+      "default_submit_to_kaggle": false,
+      "payment_enforcement_code": false
+    },
+    "notification": {
+      "telegram": {
+        "enabled": true,
+        "handled_by": "KGSTACK payment Worker and Telegram revenue monitor",
+        "trigger": "confirmed x402 paid access to /agent-visibility-report",
+        "request_project_hint": "KaggleDance / Autokaggler",
+        "secrets_in_repository": false
+      }
     }
   },
   "agent_instructions": [
@@ -71,7 +82,13 @@
     "Resolve KGSTACK_X402_BASE_URL from the runtime environment or use default_base_url.",
     "Fetch payment-options.json, pricing.json, and /.well-known/x402/discovery/resources from the KGSTACK service before attempting paid access.",
     "Use pay_to as the x402 recipient when the KGSTACK discovery response matches this metadata.",
+    "When calling /agent-visibility-report for this repository, include project=\"KaggleDance / Autokaggler\" or source_project=\"KaggleDance / Autokaggler\" so KGSTACK Telegram revenue notifications can identify the source.",
     "Expect unpaid calls to /agent-visibility-report to return HTTP 402 Payment Required.",
     "Do not look for private keys, API tokens, facilitator credentials, or settlement code in this repository."
-  ]
+  ],
+  "architecture": {
+    "kaggledance": "Higher-level agent-facing orchestration layer and shareable distribution.",
+    "autokaggler_runtime": "Local Titanic execution pipeline implemented in src/autokaggler and invoked with python -m autokaggler.",
+    "nvidia_kaggle": "Optional lower-level research/plugin bridge; no vendored NVIDIA code or required dependency."
+  }
 }

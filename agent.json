@@ -1,0 +1,78 @@
+{
+  "name": "KaggleDance",
+  "version": "0.1.0",
+  "description": "Agent-facing higher-level Kaggle automation distribution above the autokaggler runtime and optional NVIDIA/nvidia-kaggle bridge.",
+  "runtime": {
+    "python_package": "autokaggler",
+    "module_command": "python -m autokaggler",
+    "stdin_json_interface_preserved": true,
+    "default_command": "echo '{\"profile\":\"fast\"}' | python -m autokaggler"
+  },
+  "architecture": {
+    "kaggledance": "Higher-level agent-facing orchestration layer and shareable distribution.",
+    "autokaggler_runtime": "Local Titanic execution pipeline implemented in src/autokaggler.",
+    "nvidia_kaggle": "Optional lower-level research/plugin bridge. No NVIDIA code is vendored and no dependency is required."
+  },
+  "safe_defaults": {
+    "default_submit_to_kaggle": false,
+    "default_dataset_upload": false,
+    "requires_explicit_submit_confirmation": true,
+    "submit_confirmation": "I_UNDERSTAND_THIS_SUBMITS_TO_KAGGLE",
+    "contains_kaggle_credentials": false,
+    "contains_private_keys": false,
+    "contains_tokens": false,
+    "contains_wallet_secrets": false,
+    "contains_x402_verification_logic": false,
+    "contains_settlement_logic": false
+  },
+  "current_behavior": {
+    "competition": "titanic",
+    "data_sources": ["kaggle_optional", "synthetic_sample_fallback"],
+    "features": ["Title", "FamilySize", "HasCabin", "AgePclass", "FarePerPerson"],
+    "profiles": ["fast", "tree", "boosting", "ensemble", "auto"],
+    "outputs": ["submission.csv", "titanic-mastery-report.md", "run log JSON"]
+  },
+  "not_implemented_today": [
+    "default_or_automatic_kaggle_submission",
+    "kaggle_dataset_upload",
+    "generalized_non_titanic_competition_automation",
+    "bundled_nvidia_kaggle_runtime",
+    "payment_enforcement_inside_this_repository",
+    "x402_verification_or_settlement_inside_this_repository"
+  ],
+  "use_terms": {
+    "human_manual_use": {
+      "price": "free",
+      "payment_required": false
+    },
+    "ai_agent_autonomous_reuse_or_adaptation": {
+      "payment_required": true,
+      "payment_via": "KGSTACK x402 discovery",
+      "discovery_file": "agent-payment.json"
+    }
+  },
+  "payment_discovery": {
+    "provider": "KGSTACK",
+    "protocol": "x402",
+    "default_base_url": "https://kg-ninja-x402-revenue-gate-mainnet-staging.fuwafuwow.workers.dev",
+    "base_url_env": "KGSTACK_X402_BASE_URL",
+    "paid_endpoint": "/agent-visibility-report",
+    "discovery_routes": [
+      "/payment-options.json",
+      "/pricing.json",
+      "/.well-known/x402/discovery/resources",
+      "/agent.json",
+      "/openapi.json",
+      "/llms.txt"
+    ],
+    "request_project_hint": "KaggleDance / Autokaggler",
+    "unpaid_status": 402
+  },
+  "recommended_safe_run": {
+    "competition": "titanic",
+    "profile": "auto",
+    "data_source": "auto",
+    "submit": false,
+    "report": true
+  }
+}

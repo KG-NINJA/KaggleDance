@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "autokaggler"
 version = "0.1.0"
-description = "Automated pipeline for Kaggle Titanic tutorial"
-authors = [{name = "AutoKaggler"}]
+description = "KaggleDance agent-facing distribution with the autokaggler Titanic runtime"
+authors = [{name = "KG-NINJA"}]
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
@@ -25,9 +25,12 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://www.kaggle.com/competitions/titanic"
+Homepage = "https://github.com/KG-NINJA/KaggleDance"
+Titanic = "https://www.kaggle.com/competitions/titanic"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 [tool.pytest.ini_options]
 norecursedirs = ["github_shareable", ".venv", ".agent_tmp", ".agent_logs"]
+
+
